@@ -39,7 +39,7 @@ barmin1=-16; barmax1 = 16;barrange1 = range(barmin1,barmax1+1,4);
 plotcmap2 = cmocean.cm.cmap_d['delta']#['haline'] # cmocean.cm.cmap_d['curl'] # 'Spectral_r'#'seismic'#
 barmin2=-4; barmax2 = 4;barrange2 = range(barmin2,barmax2+1,2);
 
-dirRead = '/Users/nooteboom/Documents/GitHub/PO-dinocysts/' + 'OFES/OFESres/TM/'
+dirRead = 'OFES/OFESres/TM/'
 
 
 def find_nearest_index(array,value):
