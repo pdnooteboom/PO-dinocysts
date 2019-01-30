@@ -32,14 +32,14 @@ spl = [3, 6, 's1','s2', 11, 25, 50, 100, 200, 500]
 dd = 10
 res = 1
 
-tmdir = '/Users/nooteboom/Documents/PhD/parcels/OFES_global/Transtition_matrices/'
+tmdir = 'OFES/OFESres/TM/'
 
 TM = []
 for sp in spl:
     if(type(sp)==str):
-        data = np.load(tmdir + 'output/box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+sp+"_res"+str(res) + '.npz')
+        data = np.load(tmdir + 'box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+sp+"_res"+str(res) + '.npz')
     else:
-        data = np.load(tmdir + 'output/box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+str(int(sp))+"_res"+str(res) + '.npz')
+        data = np.load(tmdir + 'box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+str(int(sp))+"_res"+str(res) + '.npz')
     TM.append(data['TM'][:])
 
 Lons = data['Lons'][:]
@@ -80,9 +80,7 @@ for i in range(len(vLons)):
     surface[i] = dis1 * dis2
     
 #%% boxplot of the zonneveld locations
-zonread = '/Users/nooteboom/Documents/PhD/parcels/secondpart/'
-
-zondata = np.load(zonread + 'Zonneveldt2013_data.npy').item()
+zondata = np.load('Zonneveldt2013_data.npy').item()
 zonlat = zondata['data'][:,1].astype(float)
 zonlon = zondata['data'][:,2].astype(float)
 
@@ -139,7 +137,7 @@ for i in range(len(spl)):
 #%% The average distance part
 
 #%Load avg drift distance
-datadist = np.load(tmdir + 'output/box-avgdist/TM_box-avgdist_ddeg%d_sp'%(ddeg)+str(sp)+'_dd%d.npz'%( dd))
+datadist = np.load(tmdir + 'box-avgdist/TM_box-avgdist_ddeg%d_sp'%(ddeg)+str(sp)+'_dd%d.npz'%( dd))
 TMd = datadist['TM'][:]
 Lonsd = datadist['Lons'][:]
 Latsd = datadist['Lats'][:]
