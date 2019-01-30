@@ -29,56 +29,32 @@ ddeg = 2 # resolution of the binning
 sp = 6#'s2'
 dd = 100
 res = 1
-surfacebool = True
 
-tmdir = '/Users/nooteboom/Documents/PhD/parcels/OFES_global/Transtition_matrices/'
+tmdir = '/OFES/OFESres/TM/'
 
 if(type(sp)==str):
-    data = np.load(tmdir + 'output/box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+sp+"_res"+str(res) + '.npz')
+    data = np.load(tmdir + 'box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+sp+"_res"+str(res) + '.npz')
 else:
-    data = np.load(tmdir + 'output/box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+str(int(sp))+"_res"+str(res) + '.npz')
+    data = np.load(tmdir + 'box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+str(int(sp))+"_res"+str(res) + '.npz')
 TM = data['TM'][:]
 Lons = data['Lons'][:]
 Lats = data['Lats'][:]
-
-s1mins2 = False
-
-if(s1mins2):
-    sp = 's1'
-    sp2 = 's2'
-
-if(s1mins2):
-    data = np.load(tmdir + 'output/box-box/TMglobal_bin'+str(ddeg)+'_dd'+str(int(dd)) +'_sp'+sp2+"_res"+str(res) + '.npz')
-    TM2 = data['TM'][:]
-    Lons2 = data['Lons'][:]
-    Lats2 = data['Lats'][:]
 #%%Load avg drift distance
 if(type(sp)==str):
-    datadist = np.load(tmdir + 'output/box-avgdist/TM_box-avgdist_ddeg%d_sp'%(ddeg)+sp+'_dd%d.npz'%(dd))
-    if(s1mins2):
-        datadist2 = np.load(tmdir + 'output/box-avgdist/TM_box-avgdist_ddeg%d_sp'%(ddeg)+sp2+'_dd%d.npz'%(dd))
+    datadist = np.load(tmdir + 'box-avgdist/TM_box-avgdist_ddeg%d_sp'%(ddeg)+sp+'_dd%d.npz'%(dd))
 else:
-    datadist = np.load(tmdir + 'output/box-avgdist/TM_box-avgdist_ddeg%d_sp%d_dd%d.npz'%(ddeg, sp, dd))
+    datadist = np.load(tmdir + 'box-avgdist/TM_box-avgdist_ddeg%d_sp%d_dd%d.npz'%(ddeg, sp, dd))
 
-if(s1mins2):
-    TMd = datadist['TM'][:] - datadist2['TM'][:]
-else:
-    TMd = datadist['TM'][:]
+TMd = datadist['TM'][:]
     
 Lonsd = datadist['Lons'][:]
 Latsd = datadist['Lats'][:]
 vLons, vLats = np.meshgrid(Lonsd, Latsd)
 vLons = vLons.flatten(); vLats = vLats.flatten();
 
-#plt.contourf(TMd.reshape((len(Latsd)), len(Lonsd)))
-#plt.colorbar()
-#plt.show()
-
 Lonsd[Lonsd>=360] -= 360; 
 
 TMd = TMd[np.logical_and(vLons<360,vLats<=73)]
-
-
 #%% Calculate array that gives every grid box a surface value
 def distance(origin, destination):
     lat1, lon1 = origin
@@ -98,7 +74,6 @@ def box_depths(x, y):
     depths = np.full(x.shape, np.nan)
     
     for i in range(x.shape[0]):
-#                print i,j
         lo = x[i]+1
         if(lo>=180):
             lo -= 360
@@ -109,18 +84,17 @@ def box_depths(x, y):
                 
     return depths
 
-if(surfacebool):
-    vLons, vLats = np.meshgrid(Lons, Lats)
-    vLons = vLons.flatten(); vLats = vLats.flatten();
+vLons, vLats = np.meshgrid(Lons, Lats)
+vLons = vLons.flatten(); vLats = vLats.flatten();
 
-    surface = np.full(vLons.shape[0], 0)
-    
-    for i in range(len(vLons)):
-        lonmin = vLons[i]; lonmax = vLons[i]+ddeg;
-        latmin = vLats[i]; latmax = vLats[i]+ddeg;   
-        dis1 = distance((latmin,lonmin),(latmax,lonmin))
-        dis2 = distance((latmin,lonmin),(latmin, lonmax))
-        surface[i] = dis1 * dis2
+surface = np.full(vLons.shape[0], 0)
+
+for i in range(len(vLons)):
+    lonmin = vLons[i]; lonmax = vLons[i]+ddeg;
+    latmin = vLats[i]; latmax = vLats[i]+ddeg;   
+    dis1 = distance((latmin,lonmin),(latmax,lonmin))
+    dis2 = distance((latmin,lonmin),(latmin, lonmax))
+    surface[i] = dis1 * dis2
         
 Lons = data['Lons'][:]
 Lats = data['Lats'][:]
@@ -130,14 +104,10 @@ depth = box_depths(vLons, vLats)
         
 threshold = 0.
 connected = (TM>threshold).astype(int)
-if(s1mins2):
-    connected2 = (TM2>threshold).astype(int)
 
-if(surfacebool):
-    for i in range(connected.shape[0]):
-        connected[i] = connected[i] * surface
-        if(s1mins2):
-            connected2[i] = connected2[i] * surface
+for i in range(connected.shape[0]):
+    connected[i] = connected[i] * surface
+
             
 np.savez('toplot_TM_diag_amountboxes_avgdist_scatter_sp'+str(sp)+'_dd'+str(dd), 
          TM = np.diagonal(TM, offset=0), connected = np.sum(connected, axis=0), 
