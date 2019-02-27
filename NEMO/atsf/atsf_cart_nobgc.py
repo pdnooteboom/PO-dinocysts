@@ -103,7 +103,9 @@ def set_nemo_fieldset(ufiles, vfiles, wfiles, tfiles, bfile, mesh_mask='/project
         fieldset = FieldSet.from_nemo(filenames, variables, dimensions, indices = indices, allow_time_extrapolation=False)
         fieldset.U.vmax = 10
         fieldset.V.vmax = 10
-        fieldset.W.vmax = 10        
+        fieldset.W.vmax = 10  
+        fieldset.W.vmin = -10
+        fieldset.W.set_scaling_factor(-1)    
         return fieldset
     else:
         filenames.pop('B')
@@ -113,6 +115,8 @@ def set_nemo_fieldset(ufiles, vfiles, wfiles, tfiles, bfile, mesh_mask='/project
         fieldset.U.vmax = 10
         fieldset.V.vmax = 10
         fieldset.W.vmax = 10   
+        fieldset.W.vmin = -10
+        fieldset.W.set_scaling_factor(-1)        
         return fieldset
         
 
