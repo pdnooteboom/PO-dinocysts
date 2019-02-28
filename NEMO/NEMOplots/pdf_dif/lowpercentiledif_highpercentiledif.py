@@ -44,7 +44,7 @@ barmin1=-16; barmax1 = 16;barrange1 = range(barmin1,barmax1+1,4);
 plotcmap2 = cmocean.cm.cmap_d['delta']#['haline'] # cmocean.cm.cmap_d['curl'] # 'Spectral_r'#'seismic'#
 barmin2=-4; barmax2 = 4;barrange2 = range(barmin2,barmax2+1,2);
 
-dirRead = '/Users/nooteboom/Documents/PhD/parcels/NEMO/atsf/Transition_matrices/output/'
+dirRead = 'NEMO/NEMOres/atsf/TM/'
 
 
 def find_nearest_index(array,value):
@@ -70,7 +70,7 @@ matplotlib.rc('font', **font)
 
 #%% nth percentile var1
 
-pf = np.load(dirRead +  'box-percentile/TM_box-mean%dpercentiledif_'%(n)+var+'_ddeg%d_sp%d_dd%d'%(ddeg, int(sp),int(dd))+'.npz')
+pf = np.load(dirRead +  'box-percentiledif/TM_box-mean%dpercentiledif_'%(n)+var+'_ddeg%d_sp%d_dd%d'%(ddeg, int(sp),int(dd))+'.npz')
 
 Lons = pf['Lons'][:]
 Lats = pf['Lats'][:]
@@ -185,7 +185,7 @@ if(plotcontour):
 
 #%% (100-n)th percentile var1
 
-pf = np.load(dirRead +  'box-percentile/TM_box-mean%dpercentiledif_'%(100-n)+var+'_ddeg%d_sp%d_dd%d'%(ddeg, int(sp),int(dd))+'.npz')
+pf = np.load(dirRead +  'box-percentiledif/TM_box-mean%dpercentiledif_'%(100-n)+var+'_ddeg%d_sp%d_dd%d'%(ddeg, int(sp),int(dd))+'.npz')
 
 Lons = pf['Lons'][:]
 Lats = pf['Lats'][:]
@@ -246,7 +246,7 @@ cbar.ax.plot([16/32.+2/32.]*2,[0,1], 'k')
 cbar.ax.plot([16/32.-2/32.]*2,[0,1], 'k')
 #%% (100-n)-th percentile of var2
 
-pf = np.load(dirRead +  'box-percentile/TM_box-mean%dpercentiledif_'%(100-n)+var2+'_ddeg%d_sp%d_dd%d'%(ddeg, int(sp),int(dd))+'.npz')
+pf = np.load(dirRead +  'box-percentiledif/TM_box-mean%dpercentiledif_'%(100-n)+var2+'_ddeg%d_sp%d_dd%d'%(ddeg, int(sp),int(dd))+'.npz')
 
 Lons = pf['Lons'][:]
 Lats = pf['Lats'][:]
@@ -304,5 +304,5 @@ cbar.ax.plot([4/8.+0.5/8.]*2,[0,1], 'k')
 cbar.ax.plot([4/8.-0.5/8.]*2,[0,1], 'k')
 
 #%%
-plt.savefig('/Users/nooteboom/Documents/PhD/firstpaper/articleplots/nemoplots/' + 'dif_mean_NEMO_low-highpercentile_dd%d.pdf'%(int(dd)), bbox_inches="tight")
+plt.savefig('dif_mean_NEMO_low-highpercentile_dd%d.pdf'%(int(dd)), bbox_inches="tight")
 plt.show()

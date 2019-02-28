@@ -70,9 +70,9 @@ def set_nemo_fieldset(ufiles, vfiles, wfiles, tfiles, mesh_mask='/projects/0/pal
                  'T': 'sst',
                  'S': 'sss'}
 
-    dimensions = {'U':{'lon': 'glamf', 'lat': 'gphif',  'time': 'time_counter'},
-                  'V': {'lon': 'glamf', 'lat': 'gphif',  'time': 'time_counter'},
-                    'W': {'lon': 'glamf', 'lat': 'gphif',  'time': 'time_counter'},
+    dimensions = {'U':{'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw',  'time': 'time_counter'},
+                  'V': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw',  'time': 'time_counter'},
+                    'W': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw',  'time': 'time_counter'},
                     'T': {'lon': 'glamf', 'lat': 'gphif', 'time': 'time_counter'},
                     'S': {'lon': 'glamf', 'lat': 'gphif',  'time': 'time_counter'}}
                     
@@ -96,7 +96,9 @@ def set_nemo_fieldset(ufiles, vfiles, wfiles, tfiles, mesh_mask='/projects/0/pal
         fieldset = FieldSet.from_nemo(filenames, variables, dimensions, indices = indices, allow_time_extrapolation=False)
         fieldset.U.vmax = 10
         fieldset.V.vmax = 10
-        fieldset.W.vmax = 10        
+        fieldset.W.vmax = 10  
+        fieldset.W.vmin = -10
+        fieldset.W.set_scaling_factor(-1)
         return fieldset
     else:
         filenames.pop('B')
@@ -105,7 +107,9 @@ def set_nemo_fieldset(ufiles, vfiles, wfiles, tfiles, mesh_mask='/projects/0/pal
         fieldset = FieldSet.from_netcdf(filenames, variables, dimensions, indices = indices, allow_time_extrapolation=False)
         fieldset.U.vmax = 10
         fieldset.V.vmax = 10
-        fieldset.W.vmax = 10   
+        fieldset.W.vmax = 10 
+        fieldset.W.vmin = -10
+        fieldset.W.set_scaling_factor(-1)         
         return fieldset
 
 def SampleSurf(particle, fieldset, time, dt):
