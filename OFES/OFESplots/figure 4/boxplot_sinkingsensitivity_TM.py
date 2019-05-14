@@ -103,7 +103,7 @@ plt.title('(d)', fontsize=25)
 
 ax3 = plt.subplot2grid((2,38),(0,0), colspan=12)#9)
 plt.title('(a)', fontsize=25)  
-plt.xlabel('sinking speed       ')
+plt.xlabel('sinking speed (m day$^{-1}$)       ')
 
 res = 10000
 
