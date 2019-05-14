@@ -17,6 +17,7 @@ import matplotlib.pylab as plt
 import matplotlib
 import seaborn as sns
 import pandas as pd
+from matplotlib.font_manager import FontProperties
 
 #%%
 font = {'family' : 'Helvetica',
@@ -96,5 +97,72 @@ ax2 = plt.subplot2grid((2,19),(1,5), colspan=9)
 ax = sns.boxplot(x='sinking speed (m day$^{-1}$)', y='km', hue=' ', data=df, showmeans=True, meanprops=meanpointprops, order=order, whis=whis,  showfliers=False)
 ax.legend_.remove()
 plt.title('(c)', fontsize=25)       
+
+
+plt.title('(d)', fontsize=25)    
+
+ax3 = plt.subplot2grid((2,38),(0,0), colspan=12)#9)
+plt.title('(a)', fontsize=25)  
+plt.xlabel('sinking speed       ')
+
+res = 10000
+
+z = np.linspace(10,6000,res)
+c3 = np.full(res, 3)
+c6 = np.full(res, 6)
+c11 = np.full(res, 11)
+c25 = np.full(res, 25)
+c50 = np.full(res, 50)
+c100 = np.full(res, 100)
+c200 = np.full(res, 200)
+c500 = np.full(res, 500)
+
+def Sink1(z):
+    if(z<100):
+        return 6
+    elif(z<2000):
+        return 6 + (45-6)*(z-100)/np.float(2000-100)
+    else:
+        return 45
+        
+def Sink2(z):
+    if(z<100):
+        return 6
+    elif(z<2000):
+        return 6 + (45-6)*(z-100)/np.float(2000-100)
+    elif(z<3500):
+        return 45 + (65-45)*(z-2000)/np.float(3500-2000)
+    else:
+        return 65
+        
+cSC1 = np.array([Sink1(i) for i in z])
+cSC2 = np.array([Sink2(i) for i in z])
+
+linewidth = 3
+
+z = z / 1000.
+
+plt.plot(cSC1,z, linewidth = linewidth, label = 'SC1')
+plt.plot(cSC2,z,'--', linewidth = linewidth, label = 'SC2')
+
+plt.plot(c3,z, linewidth = linewidth, label = '3m day$^{-1}$')
+plt.plot(c6,z, linewidth = linewidth, label = '6m day$^{-1}$')
+plt.plot(c11,z, linewidth = linewidth, label = '11m day$^{-1}$')
+plt.plot(c25,z, linewidth = linewidth, label = '25m day$^{-1}$')
+plt.plot(c50,z, linewidth = linewidth, label = '50m day$^{-1}$')
+plt.plot(c100,z, linewidth = linewidth, label = '100m day$^{-1}$')
+plt.plot(c200,z, linewidth = linewidth, label = '200m day$^{-1}$')
+plt.plot(c500,z, linewidth = linewidth, label = '500m day$^{-1}$')
+
+
+fontP = FontProperties()
+fontP.set_size('small')
+plt.legend(bbox_to_anchor=(1.01, 1.0))#,['SC1', 'SC2'], prop=fontP
+
+plt.ylabel('Depth (km)')
+plt.gca().invert_yaxis()
+plt.xscale('log')
+plt.yticks(np.arange(0,13)/2.)
+
 plt.savefig( 'boxplot_TMsinksensitivity_withavgdist.pdf', bbox_inches="tight")
 plt.show()
