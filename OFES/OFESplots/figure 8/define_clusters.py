@@ -12,6 +12,7 @@ from mpl_toolkits.basemap import Basemap
 from netCDF4 import Dataset
 import seaborn as sns
 from copy import copy
+import matplotlib
 
 #%% Load Zonneveld data:
 zonread = '/Users/nooteboom/Documents/PhD/parcels/secondpart/'
@@ -41,7 +42,7 @@ ddeg = 1
 sp = 6
 dd = 10
 
-
+tail_perc = 5
 
 dirRead = '/OFES/OFESres/TM/input/'
 
@@ -99,18 +100,19 @@ bd = {'temp ($^{\circ}$C)': temp_nadv[temp_nadv!=0],
 }
 
 #%% Final subplot
+tail_perc = 5
 
-sns.set(style='darkgrid')
-
-fig = plt.figure(figsize=(12,13))
+fig = plt.figure(figsize=(20,10))
 plt.subplots_adjust(hspace=0.33)
 
-plt.subplot2grid((4,2), (0, 0), colspan=1,rowspan=2)
+sns.set(style='darkgrid', font_scale=1.7)
+
+plt.subplot2grid((2,2), (0, 0), colspan=1,rowspan=2)
 plt.title('(a)', style='italic')
-m = Basemap(projection= 'splaea',boundinglat=-12,lon_0=90,resolution='l')#north pole: 'nplaea', south pole: 'spaeqd'   'splaea'
+m = Basemap(projection= 'splaea',boundinglat=-12,lon_0=90,resolution='l')
 m.drawcoastlines()
-m.drawmapboundary(fill_color='w')#black')
-m.fillcontinents(color='grey')#, lake_color='lightskyblue')
+m.drawmapboundary(fill_color='w')
+m.fillcontinents(color='grey')
 m.drawparallels(np.arange(-70, 70, 20), labels=[True, False, False, False])
 m.drawmeridians(np.arange(0, 361, 45), labels=[False, False, False, True]) 
 
@@ -118,37 +120,59 @@ xzon, yzon = m(lons, lats)
 
 for i in range(n_clusters):
     idx = np.where(czon==i)
-    plt.scatter(xzon[idx], yzon[idx], s=18, c=colors[i], zorder=3, label='cluster %d'%(i+1), marker=symbols[i])
-plt.legend(title='Cluster', loc=2)#,bbox_to_anchor=(0.24, 0.64))
+    plt.scatter(xzon[idx], yzon[idx], s=70, c=colors[i], zorder=3, label='cluster %d'%(i+1), marker=symbols[i])
+plt.legend(title='Cluster', loc=2)
 
+ax = plt.subplot2grid((2,2), (0, 1))
 
-#ax = plt.subplot(321)
-plt.subplot2grid((4,2), (0, 1))
-#ax.subplots_adjust(bottom=0.06)
-sns.boxplot(x='cluster',y='temp ($^{\circ}$C)', data=bd, palette=colors, whis=[0,100])
-plt.ylabel('($^{\circ}$C)')
-plt.title('(b)', style='italic')
-plt.xlabel('Cluster', x=0.1, y=5)
+ax.yaxis.tick_right()
+ax.yaxis.set_label_position("right")
 
-#plt.subplot(322)
-plt.subplot2grid((4,2), (1, 1))
 bspecies = [72]
+plt.ylabel('mean LPDF($^{\circ}$C)')
+cmap    = plt.get_cmap('nipy_spectral')
+
 for i in range(len(bspecies)):
     idx = bspecies[i] - 19
     ra_species = sdata[:,idx]
-    clusters = czon[ra_species>0]
-    ra_species = ra_species[ra_species>0]
-    bd_species = {
-    'Relative abundace (%)':  ra_species,
-    'cluster':clusters+1
-    }
-    plt.title('(c) '+species[idx][:-3], style='italic')
-    sns.boxplot(x='cluster',y='Relative abundace (%)', data=bd_species, palette=colors, whis=[0,100])
-    plt.xlabel('Cluster', x=0.1)
-    plt.ylabel('Relative abundance (%)')
+    clusters = czon[ra_species==0]
+    temp = temp_nadv[ra_species==0]   
+    ra_species = ra_species[ra_species==0]
+    ra_species = ra_species[temp>0]; clusters = clusters[temp>0]; temp = temp[temp>0]; 
 
-#plt.subplot(323)
-plt.subplot2grid((4, 2), (2, 0))
+    bd_species = {
+    'Relative abundace (%)':  np.append(ra_species, np.zeros(1)),
+    'cluster':np.append(clusters+1,np.array([1])),
+    '$^{\circ}$C': np.append(temp,np.array([-50]))
+    }
+
+    ra_species = sdata[:,idx]
+    clusters = czon[ra_species>0]
+    temp = temp_nadv[ra_species>0]#[temp_nadv!=0]    
+    ra_species = ra_species[ra_species>0]    
+    bd_species2 = {
+    'Relative abundace (%)':  ra_species,
+    'cluster':clusters+1,
+    '$^{\circ}$C': temp
+    }    
+    plt.title('(b) '+species[idx][:-3], style='italic')
+    
+    colo = {}#LogNorm  Normalize
+    norm=matplotlib.colors.LogNorm(vmin = 0.1, vmax=100)
+    for cval in bd_species2['Relative abundace (%)']:
+        colo.update({cval : cmap(norm(cval))})
+    
+    sns.swarmplot(x='cluster',y='$^{\circ}$C', hue='Relative abundace (%)', size=9, data=bd_species, color='k')#, cmap='jet', palette=colors)#, whis=[0,100])
+    sns.swarmplot(x='cluster',y='$^{\circ}$C', hue='Relative abundace (%)', size=9, data=bd_species2, palette=colo)#, whis=[0,100])
+    plt.ylim(-3,30)
+    plt.gca().legend_.remove()
+    
+    
+    plt.xlabel('Cluster', x=0.1)
+    
+ax = plt.subplot2grid((2,2), (1, 1))
+ax.yaxis.tick_right()
+ax.yaxis.set_label_position("right")
 cluster = 1
 species_no = 72 - 19
 ra_species = sdata[:,species_no]
@@ -172,61 +196,14 @@ mean_LPDF= np.array(mean_LPDF); left_tail = np.array(left_tail); right_tail = np
 print species[species_no], '   and cluster  ', cluster +1
 
 id_ra = np.array(ra)>0
-plt.scatter(mean_LPDF, np.array(left_tail) - np.array(mean_LPDF) , c='k')
-plt.scatter(mean_LPDF[id_ra], np.array(left_tail)[id_ra] - np.array(mean_LPDF)[id_ra] , c=np.array(ra)[id_ra], cmap=cmap)
+plt.scatter(mean_LPDF, np.array(left_tail) - np.array(mean_LPDF) , c='k', s=70)
+plt.scatter(mean_LPDF[id_ra], np.array(left_tail)[id_ra] - np.array(mean_LPDF)[id_ra] , c=np.array(ra)[id_ra], cmap=cmap, s=70, vmin=0.1, vmax=100,  norm=matplotlib.colors.LogNorm())
 plt.ylabel('AB1$\mathregular{^{cold}}$ ($^{\circ}$C)')
-plt.title('(d) Cluster 2', style='italic')
-#plt.xlabel('mean LPDF ($^{\circ}$C)')
-
-#plt.subplot(325)
-plt.subplot2grid((4, 2), (3, 0))
-plt.scatter(mean_LPDF, np.array(right_tail) - np.array(mean_LPDF) , c='k')
-plt.scatter(mean_LPDF[id_ra], np.array(right_tail)[id_ra] - np.array(mean_LPDF)[id_ra], c=np.array(ra)[id_ra], cmap=cmap)
-plt.ylabel('AB1$\mathregular{^{warm}}$ ($^{\circ}$C)')
+plt.title('(c) Cluster 2', style='italic')
 plt.xlabel('mean LPDF ($^{\circ}$C)')
-plt.title('(f)', style='italic')
-plt.colorbar(orientation='horizontal', cax = fig.add_axes([0.13, 0.05, 0.3, 0.03]),  label='Relative abundance(%)')
 
-#plt.subplot(324)
-plt.subplot2grid((4, 2), (2, 1))
-cluster = 4
-species_no = 72 - 19
-ra_species = sdata[:,species_no]
+cbar = plt.colorbar(orientation='horizontal', cax = fig.add_axes([0.57, 0.01, 0.3, 0.03]),  label='Relative abundance(%)')
 
-n_loc = np.sum(czon==cluster); idx_loc = np.where(czon==cluster);
-left_tail = []
-right_tail = []
-mean_LPDF = []
-ra = []
-for i in range(n_loc):
-    temp_series = ts[idx_loc[0][i]]
-    temp_series = temp_series[temp_series<200]
-    if(len(temp_series)>0):
-        ra.append(ra_species[idx_loc[0][i]])
-        left_tail.append(np.nanpercentile(temp_series,tail_perc))
-        right_tail.append(np.nanpercentile(temp_series,100-tail_perc))
-        mean_LPDF.append(temp_nadv[idx_loc[0][i]])
-
-mean_LPDF= np.array(mean_LPDF); left_tail = np.array(left_tail); right_tail = np.array(right_tail); ra= np.array(ra)
-
-print species[species_no], '   and cluster  ', cluster +1
-
-id_ra = np.array(ra)>0
-plt.scatter(mean_LPDF, np.array(left_tail) - np.array(mean_LPDF), c='k')
-plt.scatter(mean_LPDF[id_ra], np.array(left_tail)[id_ra] - np.array(mean_LPDF)[id_ra], c=np.array(ra)[id_ra], cmap=cmap)
-plt.title('(e) Cluster 5', style='italic')
-#plt.ylabel('mean(LPDF) - cold tail ADPF ($^{\circ}$C)')
-#plt.xlabel('mean LPDF ($^{\circ}$C)')
-
-
-#plt.subplot(326)
-plt.subplot2grid((4, 2), (3, 1))
-plt.scatter(mean_LPDF,np.array(right_tail) - np.array(mean_LPDF) , c='k')
-plt.scatter(mean_LPDF[id_ra],np.array(right_tail)[id_ra] - np.array(mean_LPDF)[id_ra], c=np.array(ra)[id_ra], cmap=cmap)
-#plt.ylabel('mean(LPDF) - warm tail ADPF ($^{\circ}$C)')
-plt.xlabel('mean LPDF ($^{\circ}$C)')
-plt.title('(g)', style='italic')
-plt.colorbar(orientation='horizontal', cax = fig.add_axes([0.56, 0.05, 0.3, 0.03]), label='Relative abundance(%)')
-
-plt.savefig('Santarctica_Kmeans.pdf', bbox_inches="tight")
+cbar.ax.plot([0.005,0.005],[0,1], 'k', linewidth=4.5)
+plt.savefig('figure8.pdf', bbox_inches="tight")
 plt.show()
