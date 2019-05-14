@@ -45,7 +45,9 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 font = {'family' : 'Helvetica',
 #        'weight' : 'bold',
         'size'   : 16}
-
+ifont = {'family' : 'Helvetica',
+        'style' : 'italic',
+        'size'   : 18}
 matplotlib.rc('font', **font) 
 
 sp = 6
@@ -179,7 +181,7 @@ m.drawmapboundary(fill_color='w')#black')
 m.fillcontinents(color='grey')#, lake_color='lightskyblue')
 m.drawparallels(np.arange(-70, 70, 20), labels=[True, False, False, False])
 m.drawmeridians(np.arange(0, 361, 45), labels=[False, False, False, True]) 
-plt.title('(a) ' + zondata['variables'][specie_number][:-3])
+plt.title('(a) ' + zondata['variables'][specie_number][:-3],**ifont)
 
 aclon, aclat = m(acclon, acclat)
 xzon, yzon = m(zonlon, zonlat)
@@ -205,7 +207,7 @@ plt.scatter(temp_nadv,relative_abundances, s=15, c='navy', label='mean LPDF', al
 plt.scatter(LI, ra, s=15, color=redcolor, zorder=10, label='tail APDF', alpha=0.7)
 plt.ylabel('relative abundance')
 plt.xlim(-3,23)
-plt.title('(b) ' + zondata['variables'][specie_number])
+plt.title('(b) ' + zondata['variables'][specie_number],**ifont)
 #%% Last subplot for equatorial specie
 ts = pf[var][:]
 tslon = pf['lon'][:]
@@ -256,13 +258,13 @@ if(delicatus):
     plt.scatter(LI[ra>lb], ra[ra>lb], s=15, color=redcolor, zorder=10, label='tail APDF', alpha=0.7)
     plt.xlim(3,33)
     plt.xlabel('temperature ($^{\circ}C$)')
-    plt.title('(c) ' + zondata['variables'][specie_number])    
+    plt.title('(c) ' + zondata['variables'][specie_number],**ifont)    
 else:
     #scatterplot of salinity:
     plt.scatter(salin_nadv,relative_abundances, s=15, c='navy', label='mean LPDF', alpha=0.7)
     plt.scatter(LI_salin[LI_salin<100], ra[LI_salin<100], s=15, color=redcolor, zorder=10, label='tail APDF', alpha=0.7)
     plt.xlabel('salinity (PSU)')
-    plt.title('(c) ' )
+    plt.title('(c) ' ,**ifont)
 
 plt.ylabel('relative abundance')
 
