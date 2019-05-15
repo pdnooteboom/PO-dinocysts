@@ -13,6 +13,13 @@ from netCDF4 import Dataset
 import seaborn as sns
 from copy import copy
 import matplotlib
+import matplotlib.colors as pcolo
+
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    new_cmap = pcolo.LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
 
 #%% Load Zonneveld data:
 zonread = '/Users/nooteboom/Documents/PhD/parcels/secondpart/'
@@ -130,7 +137,8 @@ ax.yaxis.set_label_position("right")
 
 bspecies = [72]
 plt.ylabel('mean LPDF($^{\circ}$C)')
-cmap    = plt.get_cmap('nipy_spectral')
+cmap    = plt.cm.get_cmap('nipy_spectral_r')
+cmap = truncate_colormap(cmap, 0.01, 0.85)
 
 for i in range(len(bspecies)):
     idx = bspecies[i] - 19
